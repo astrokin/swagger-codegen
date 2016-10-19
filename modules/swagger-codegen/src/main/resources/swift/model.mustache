@@ -36,7 +36,7 @@ struct {{classname}}: JSONDecoding {
         let dict = try JSONDictionary(input)
         return try {{classname}}({{#vars}}{{#isNotContainer}}
             {{name}}: dict.decodeJSON(forKey: "{{baseName}}"){{/isNotContainer}}{{^isNotContainer}}
-            {{name}}: dict.forArray(forKey: "{{baseName}}") { try $0.decodeJSON(forKey: "value") }{{/isNotContainer}}{{^-last}},{{/-last}}{{/vars}}
+            {{name}}: dict.forArray(forKey: "{{baseName}}") { try $0.decodeJSON(forKey: "{{name}}") }{{/isNotContainer}}{{^-last}},{{/-last}}{{/vars}}
         )
     }
 
