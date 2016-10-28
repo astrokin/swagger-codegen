@@ -71,7 +71,7 @@ public class SwiftCodegen extends DefaultCodegen implements CodegenConfig {
         apiTemplateFiles.put("api.mustache", ".swift");
         embeddedTemplateDir = templateDir = "swift";
         apiPackage = File.separator + "APIs";
-        modelPackage = File.separator + "Models";
+        modelPackage = File.separator + "CAB";
 
         languageSpecificPrimitives = new HashSet<String>(
                 Arrays.asList(

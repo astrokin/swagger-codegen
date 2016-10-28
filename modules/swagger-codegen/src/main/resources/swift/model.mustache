@@ -4,8 +4,8 @@ import Foundation
 /** {{description}} */{{/description}}
 struct {{classname}}: JSONDecoding {
 {{#vars}}{{#isEnum}}
-    typealias {{datatypeWithEnum}} = TaggedValue<String, {{datatypeWithEnum}}Tag>
-    enum {{datatypeWithEnum}}Tag: String { {{#allowableValues}}{{#values}}
+    enum {{datatypeWithEnum}}: String, JSONDecodableEnum {
+        case Undefined {{#allowableValues}}{{#values}}
         case {{enum}} = "{{raw}}"{{/values}}{{/allowableValues}}
     }
 {{/isEnum}}
@@ -34,9 +34,9 @@ struct {{classname}}: JSONDecoding {
 
     static func decodeJSON(input: AnyObject) throws -> {{classname}} {
         let dict = try JSONDictionary(input)
-        return try {{classname}}({{#vars}}{{#isNotContainer}}
-            {{name}}: dict.decodeJSON(forKey: "{{baseName}}"){{/isNotContainer}}{{^isNotContainer}}
-            {{name}}: dict.forArray(forKey: "{{baseName}}") { try $0.decodeJSON() }{{/isNotContainer}}{{^-last}},{{/-last}}{{/vars}}
+            return try {{classname}}({{#vars}}{{#isNotContainer}}
+            {{name}}: {{#required}}{{#isEnum}}(try? {{/isEnum}}{{/required}}{{^required}}{{#isEnum}}try?{{/isEnum}}{{/required}} dict.decodeJSON(forKey: "{{baseName}}"){{#required}}{{#isEnum}}) ?? {{{datatypeWithEnum}}}.Undefined{{/isEnum}}{{/required}}{{/isNotContainer}}{{^isNotContainer}}
+            {{name}}: dict.forArray(forKey: "{{baseName}}"){{/isNotContainer}}{{^-last}},{{/-last}}{{/vars}}
         )
     }
 
