@@ -32,6 +32,7 @@ import 'rxjs/add/operator/map';
 
 import * as models                                           from '../model/models';
 import { BASE_PATH }                                         from '../variables';
+import { Configuration }                                     from '../configuration';
 
 /* tslint:disable:no-unused-variable member-ordering */
 
@@ -40,11 +41,30 @@ import { BASE_PATH }                                         from '../variables'
 export class PetApi {
     protected basePath = 'http://petstore.swagger.io/v2';
     public defaultHeaders: Headers = new Headers();
+    public configuration: Configuration = new Configuration();
 
-    constructor(protected http: Http, @Optional()@Inject(BASE_PATH) basePath: string) {
+    constructor(protected http: Http, @Optional()@Inject(BASE_PATH) basePath: string, @Optional() configuration: Configuration) {
         if (basePath) {
             this.basePath = basePath;
         }
+        if (configuration) {
+            this.configuration = configuration;
+        }
+    }
+	
+	/**
+     * 
+     * Extends object by coping non-existing properties.
+     * @param objA object to be extended
+     * @param objB source object
+     */
+    private extendObj<T1,T2>(objA: T1, objB: T2) {
+        for(let key in objB){
+            if(objB.hasOwnProperty(key)){
+                objA[key] = objB[key];
+            }
+        }
+        return <T1&T2>objA;
     }
 
     /**
@@ -204,7 +224,14 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
 
         headers.set('Content-Type', 'application/json');
 
@@ -213,9 +240,13 @@ export class PetApi {
             method: RequestMethod.Post,
             headers: headers,
             body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -246,16 +277,27 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
 
 
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Delete,
             headers: headers,
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -284,16 +326,27 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
 
 
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -322,16 +375,27 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
 
 
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -361,16 +425,32 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+        // authentication (api_key) required
+        if (this.configuration.apiKey)
+        {
+            headers.set('api_key', this.configuration.apiKey);
+        }
+            
 
 
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Get,
             headers: headers,
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -398,7 +478,14 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
 
         headers.set('Content-Type', 'application/json');
 
@@ -407,9 +494,13 @@ export class PetApi {
             method: RequestMethod.Put,
             headers: headers,
             body: body == null ? '' : JSON.stringify(body), // https://github.com/angular/angular/issues/10612
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -444,24 +535,35 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
         headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
 
         if (name !== undefined) {
-        	formParams.set('name', <any>name); 
+            formParams.set('name', <any>name); 
         }
         if (status !== undefined) {
-        	formParams.set('status', <any>status); 
+            formParams.set('status', <any>status); 
         }
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Post,
             headers: headers,
             body: formParams.toString(),
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
@@ -496,24 +598,35 @@ export class PetApi {
             'application/json', 
             'application/xml'
         ];
-
+        
+        // authentication (petstore_auth) required
+        // oauth required
+        if (this.configuration.accessToken)
+        {
+            headers.set('Authorization', 'Bearer ' + this.configuration.accessToken);
+        }
+            
         headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
 
         if (additionalMetadata !== undefined) {
-        	formParams.set('additionalMetadata', <any>additionalMetadata); 
+            formParams.set('additionalMetadata', <any>additionalMetadata); 
         }
         if (file !== undefined) {
-        	formParams.set('file', <any>file); 
+            formParams.set('file', <any>file); 
         }
 
         let requestOptions: RequestOptionsArgs = new RequestOptions({
             method: RequestMethod.Post,
             headers: headers,
             body: formParams.toString(),
-            search: queryParameters,
-            responseType: ResponseContentType.Json
+            search: queryParameters
         });
+        
+        // https://github.com/swagger-api/swagger-codegen/issues/4037
+        if (extraHttpRequestParams) {
+            requestOptions = this.extendObj(requestOptions, extraHttpRequestParams);
+        }
 
         return this.http.request(path, requestOptions);
     }
