@@ -34,8 +34,30 @@ extension {{classname}}: TargetType {
     var multipartBody: [MultipartFormData]? { return nil }
 }{{#operations}}{{#operation}}
 
+// MARK: - HTTPHeaders
+extension {{classname}}: HTTPHeaders {
+
+    var httpHeaders: [String: String] {
+        switch self { {{#operations}}{{#operation}}
+            case .{{operationId}}(let attributes): return attributes.toHeaderParams(){{/operation}}{{/operations}}
+        }
+    }
+}
+
 struct {{operationId}}RequestAttributes { {{#allParams}}
-    let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}}{{/allParams}}
+
+{{#headerParams}}
+    let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //header param{{/headerParams}}
+{{#bodyParams}}
+let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //body param{{/bodyParams}}
+{{#pathParams}}
+let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //path param{{/pathParams}}
+{{#queryParams}}
+let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //query param{{/queryParams}}
+{{#headerParams}}
+let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //header param{{/headerParams}}
+{{#formParams}}
+let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //form param{{/formParams}}
 
     init({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{#hasMore}},
         {{/hasMore}}{{/allParams}}) { {{#allParams}}
@@ -45,6 +67,12 @@ struct {{operationId}}RequestAttributes { {{#allParams}}
     func toRequestParams() -> [String: AnyObject]? {
         var params = [String: AnyObject](){{#allParams}}{{#isQueryParam}}
         params.insert({{paramName}}, forKey: "{{paramName}}"){{/isQueryParam}}{{/allParams}}
+        return params
+    }
+
+    func toHeaderParams() -> [String: String] {
+        var params = [String: String](){{#headerParams}}
+        params.insert({{paramName}}, forKey: "{{paramName}}"){{/headerParams}}
         return params
     }
 
