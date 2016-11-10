@@ -35,7 +35,7 @@ struct {{classname}}: JSONDecoding {
     static func decodeJSON(input: AnyObject) throws -> {{classname}} {
         let dict = try JSONDictionary(input)
             return try {{classname}}({{#requiredVars}}{{#isNotContainer}}
-            {{name}}: {{#required}}{{#isEnum}}(try{{/isEnum}}{{/required}}{{^required}}{{#isEnum}}try{{/isEnum}}{{/required}} dict.decodeJSON(forKey: "{{baseName}}"){{#required}}{{#isEnum}}) ?? {{{datatypeWithEnum}}}.Undefined{{/isEnum}}{{/required}}{{/isNotContainer}}{{^isNotContainer}}
+            {{name}}: {{#required}}{{#isEnum}}(try? {{/isEnum}}{{/required}}{{^required}}{{#isEnum}}try?{{/isEnum}}{{/required}} dict.decodeJSON(forKey: "{{baseName}}"){{#required}}{{#isEnum}}) ?? {{{datatypeWithEnum}}}.Undefined{{/isEnum}}{{/required}}{{/isNotContainer}}{{^isNotContainer}}
             {{name}}: dict.forArray(forKey: "{{baseName}}"){{/isNotContainer}}{{^-last}},{{/-last}}{{/requiredVars}}{{#optionalVars}}{{#isNotContainer}}
             {{name}}: {{#required}}{{#isEnum}}(try? {{/isEnum}}{{/required}}{{^required}}{{#isEnum}}try?{{/isEnum}}{{/required}} dict.decodeJSON(forKey: "{{baseName}}"){{#required}}{{#isEnum}}) ?? {{{datatypeWithEnum}}}.Undefined{{/isEnum}}{{/required}}{{/isNotContainer}}{{^isNotContainer}}
             {{name}}: dict.forArray(forKey: "{{baseName}}"){{/isNotContainer}}{{^-last}},{{/-last}}{{/optionalVars}}
