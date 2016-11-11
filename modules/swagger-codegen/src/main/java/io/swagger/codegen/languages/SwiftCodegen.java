@@ -135,6 +135,14 @@ public class SwiftCodegen extends DefaultCodegen implements CodegenConfig {
         typeMapping.put("ByteArray", "NSData");
         typeMapping.put("UUID", "NSUUID");
 
+        setReservedWordsLowerCase(
+         Arrays.asList(
+                       // local variable names in API methods (endpoints)
+                       "resourcePath", "pathParams", "queryParams", "headerParams",
+                       "responseContentType", "requestContentType", "authSettings",
+                       "formParams", "localVarFiles", "bodyParam"
+                       ));
+        
         importMapping = new HashMap<String, String>();
 
         cliOptions.add(new CliOption(PROJECT_NAME, "Project name in Xcode"));
