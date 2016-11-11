@@ -489,7 +489,7 @@ public class SwiftCodegen extends DefaultCodegen implements CodegenConfig {
         parameters = Lists.newArrayList(Iterators.filter(parameters.iterator(), new Predicate<Parameter>() {
             @Override
             public boolean apply(@Nullable Parameter parameter) {
-                return !(parameter instanceof HeaderParameter);
+                return true;
             }
         }));
         operation.setParameters(parameters);
