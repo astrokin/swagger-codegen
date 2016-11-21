@@ -6,10 +6,10 @@ enum {{classname}} { {{#operations}}{{#operation}}
 }
 
 //MARK: - TargetType
-extension {{classname}}: TargetType {
+extension {{classname}}: TargetType, HTTPParametersEncoding {
 
     var baseURL: NSURL {
-        return NSURL(string: "http://198.199.123.158")!
+        return NSURL(string: "https://ecsb00100aeb.epam.com")!
     }
 
     var path: String {
@@ -30,30 +30,35 @@ extension {{classname}}: TargetType {
         }
     }
 
-    var sampleData: NSData { return NSData() }
-    var multipartBody: [MultipartFormData]? { return nil }
-}{{#operations}}{{#operation}}
-
-// MARK: - HTTPHeaders
-extension {{classname}}: HTTPHeaders {
+    var parameterEncoding: ParameterEncoding? {
+        switch self { {{#operations}}{{#operation}}
+            case .{{operationId}}: return {{operationId}}RequestAttributes.parameterEncoding{{/operation}}{{/operations}}
+        }
+    }
 
     var httpHeaders: [String: String] {
         switch self { {{#operations}}{{#operation}}
             case .{{operationId}}(let attributes): return attributes.toHeaderParams(){{/operation}}{{/operations}}
         }
     }
-}
 
-struct {{operationId}}RequestAttributes { {{#headerParams}}
-    let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //header param{{/headerParams}}{{#bodyParams}}
+    var sampleData: NSData { return NSData() }
+    var multipartBody: [MultipartFormData]? { return nil }
+}{{#operations}}{{#operation}}
+
+struct {{operationId}}RequestAttributes {
+
+{{#allParams}}{{#isEnum}}{{^isContainer}}
+    enum {{{datatypeWithEnum}}}_{{operationId}}: String { {{#allowableValues}}{{#values}}
+        case {{enum}} = "{{raw}}"{{/values}}{{/allowableValues}}
+}{{/isContainer}}{{/isEnum}}{{/allParams}}
+
+{{#bodyParams}}
     let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //body param{{/bodyParams}}{{#pathParams}}
     let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //path param{{/pathParams}}{{#queryParams}}
     let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //query param{{/queryParams}}{{#headerParams}}
     let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //header param{{/headerParams}}{{#formParams}}
     let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}} //form param{{/formParams}}
-
-    //all param {{#allParams}}
-    let {{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}}{{/allParams}}
 
     init({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{#hasMore}},
         {{/hasMore}}{{/allParams}}) { {{#allParams}}
@@ -62,15 +67,62 @@ struct {{operationId}}RequestAttributes { {{#headerParams}}
 
     func toRequestParams() -> [String: AnyObject]? {
         var params = [String: AnyObject](){{#allParams}}{{#isQueryParam}}
-        params.insert({{paramName}}, forKey: "{{paramName}}"){{/isQueryParam}}{{/allParams}}
+        params.insert({{paramName}}{{#isEnum}}{{^required}}?{{/required}}.rawValue{{/isEnum}}, forKey: "{{paramName}}"){{/isQueryParam}}{{/allParams}}
         return params
     }
 
     func toHeaderParams() -> [String: String] {
         var params = [String: String](){{#headerParams}}
-        params.insert({{paramName}}, forKey: "{{paramName}}"){{/headerParams}}
+        params.insert({{paramName}}{{#isEnum}}{{^required}}?{{/required}}.rawValue{{/isEnum}}, forKey: "{{paramName}}"){{/headerParams}}
         return params
     }
 
+}
+
+// MARK: - Params encoding
+private extension {{operationId}}RequestAttributes {
+
+    static var parameterEncoding: ParameterEncoding? {
+        return ParameterEncoding.Custom { (requestConvertable, params) -> (NSMutableURLRequest, NSError?) in
+            var request = requestConvertable.URLRequest
+            guard let requestAttributes = {{operationId}}RequestAttributes(requestParams: params) else {
+                return (request, nil)
+            }
+
+            if let urlParams = requestAttributes.toUrlParams() {
+                let (requestWithUrlParams, error) = request.encodeUrlParams(urlParams)
+                request = requestWithUrlParams
+                guard error == nil else { return (request, error) }
+            }
+
+            if let jsonBodyParams = requestAttributes.toJsonBodyParams() {
+                let (requestWithJsonBodyParams, error) = request.encodeJsonBodyParams(jsonBodyParams)
+                request = requestWithJsonBodyParams
+                guard error == nil else { return (request, error) }
+            }
+
+            return (request, nil)
+        }
+    }
+
+    init?(requestParams: [String: AnyObject]?) {
+        guard let requestParams = requestParams,{{#queryParams}}
+            let {{paramName}} = requestParams["{{paramName}}"] as? {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}?{{/required}}{{#hasMore}},{{/hasMore}}{{/queryParams}} else { return nil }
+
+        self.init({{#allParams}}{{#isQueryParam}}{{paramName}}: {{paramName}}{{#hasMore}},
+        {{/hasMore}}{{/isQueryParam}}{{#isBodyParam}}{{paramName}}: {{{dataType}}}(/*FIXME*/){{/isBodyParam}}{{/allParams}})
+    }
+
+    func toUrlParams() -> [String: AnyObject]? {
+        var params = [String: AnyObject](){{#allParams}}{{#isQueryParam}}
+        params.insert({{paramName}}{{#isEnum}}{{^required}}?{{/required}}.rawValue{{/isEnum}}, forKey: "{{paramName}}"){{/isQueryParam}}{{/allParams}}
+        return params
+    }
+
+    func toJsonBodyParams() -> [String: AnyObject]? {
+        var params = [String: AnyObject](){{#allParams}}{{#isBodyParam}}
+        params.insert({{paramName}}{{#isEnum}}{{^required}}?{{/required}}.rawValue{{/isEnum}}, forKey: {{paramName}}) {{/isBodyParam}}{{/allParams}}/*FIXME*/
+        return params
+    }
 }
 {{/operation}}{{/operations}}
